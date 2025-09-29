@@ -139,7 +139,7 @@ API 문서는 방대한 문서와 복잡한 구조로 인해 개발자가 필요
 
 ### [**아키텍처 다이어그램**]
 
-![img_1.png](image/system_architecture.png)
+![img_1.png](images/system_architecture.png)
 
 ---
 
@@ -212,7 +212,7 @@ API 문서는 방대한 문서와 복잡한 구조로 인해 개발자가 필요
 
 ## ♒ 프로젝트 User-Flow
 
-![img.png](image/architecture.png)
+![img.png](images/architecture.png)
 
 ### 🧭 유저 플로우 정리
 
@@ -278,18 +278,18 @@ API 문서는 방대한 문서와 복잡한 구조로 인해 개발자가 필요
 | **모니터링/출력** | log_every=10 steps, save_every=50 steps                                                                                   |
 | **전처리** | Qwen chat 템플릿, assistant 응답만 라벨링, 배치 최대 길이 패딩, 토큰 최대 8192                                                                 |
 
-![finetuning_lora.png](image/finetuning_lora.png)
+![finetuning_lora.png](images/finetuning_lora.png)
 
 #### **⚙️ 파인튜닝 학습 로그**
 
 - Qwen2.5-7B-Instruct
-![qwen2_5_7b_finetuning_log.png](image/qwen2_5_7b_finetuning_log.png)
+![qwen2_5_7b_finetuning_log.png](images/qwen2_5_7b_finetuning_log.png)
 - Qwen3-8B
-![qwen3_8b_finetuning_log.png](image/qwen3_8b_finetuning_log.png)
+![qwen3_8b_finetuning_log.png](images/qwen3_8b_finetuning_log.png)
 
 
 #### 모델 서비스 아키텍쳐
-![img.png](image/qwen_architecture.png)
+![img.png](images/qwen_architecture.png)
 
 #### **📊 성능 평가**
 
@@ -521,7 +521,7 @@ API 문서는 방대한 문서와 복잡한 구조로 인해 개발자가 필요
 
 - **예시 데이터:**
 
-![img.png](image/qa_sample.png)
+![img.png](images/qa_sample.png)
 
 ### **🏢 sLLM 파인튜닝용 데이터 전처리**
 
@@ -581,14 +581,14 @@ API 문서는 방대한 문서와 복잡한 구조로 인해 개발자가 필요
 - **[최종 학습 데이터셋 업로드 링크(허깅페이스)](https://huggingface.co/datasets/SKN14-Final-1Team/qwen-finetuning-data-ko-250919)**
 - **샘플 데이터:**
 
-![img.png](image/finetuning_data.png)
+![img.png](images/finetuning_data.png)
 
 ---
 
 ## 🔀 ERD
 > 아래 **ERD (Entity-Relationship Diagram)**는 **사용자 관리**, **채팅 세션**, **카드 관리**, **메시지 기록** 등을 포함한 주요 테이블 구조를 보여줍니다. 각 테이블은 다음과 같이 연결됩니다:
 
-![img.png](image/erd.png)
+![img.png](images/erd.png)
 
 
 - **User**: 시스템의 사용자 정보를 관리하며, **API Key**, **Card**, **Chat Session**, **Approval Log**와 연결됩니다.
