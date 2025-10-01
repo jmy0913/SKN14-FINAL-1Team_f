@@ -84,7 +84,7 @@ def frontend_search(keyword: str) -> str:
         vectorstore = Chroma(
             persist_directory=DB_DIR / "frontend", embedding_function=embedding_model
         )
-        docs = vectorstore.similarity_search(keyword, k=3)
+        docs = vectorstore.similarity_search(keyword, k=7)
         if not docs:
             logger.info(f"-------- frontend 관련된 답변을 찾지 못했습니다.")
             return f"frontend 관련된 답변을 찾지 못했습니다."
@@ -113,7 +113,7 @@ def backend_search(keyword: str) -> str:
         vectorstore = Chroma(
             persist_directory=DB_DIR / "backend", embedding_function=embedding_model
         )
-        docs = vectorstore.similarity_search(keyword, k=3)
+        docs = vectorstore.similarity_search(keyword, k=7)
         if not docs:
             logger.info(f"-------- backend 관련된 답변을 찾지 못했습니다.")
             return f"backend 관련된 답변을 찾지 못했습니다."
@@ -142,7 +142,7 @@ def data_ai_search(keyword: str) -> str:
         vectorstore = Chroma(
             persist_directory=DB_DIR / "data_ai", embedding_function=embedding_model
         )
-        docs = vectorstore.similarity_search(keyword, k=3)
+        docs = vectorstore.similarity_search(keyword, k=7)
         if not docs:
             logger.info(f"-------- data_ai 관련된 답변을 찾지 못했습니다.")
             return f"data_ai 관련된 답변을 찾지 못했습니다."
@@ -171,7 +171,7 @@ def cto_search(keyword: str) -> str:
         vectorstore = Chroma(
             persist_directory=DB_DIR / "cto", embedding_function=embedding_model
         )
-        docs = vectorstore.similarity_search(keyword, k=3)
+        docs = vectorstore.similarity_search(keyword, k=7)
         if not docs:
             logger.info(f"-------- cto 관련된 답변을 찾지 못했습니다.")
             return f"cto 관련된 답변을 찾지 못했습니다."
@@ -202,7 +202,7 @@ class LangChainChatService:
             model=self.model_name,
             openai_api_base=self.api_url,
             openai_api_key=self.api_key,
-            temperature=0.2,
+            temperature=0.0,
         )
 
     async def get_chat_response(self, request: ChatRequest) -> str:
