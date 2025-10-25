@@ -115,7 +115,7 @@ top_k 조정 자체 정량 평가 결과 (20점 만점)
 
 ---
 
-> [전체 프로젝트 깃허브 링크](https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN14-FINAL-1Team)
+> 전체 프로젝트 깃허브 링크: https://github.com/SKNETWORKS-FAMILY-AICAMP/SKN14-FINAL-1Team
 
 <details>
 <summary>부록: 전체 프로젝트 README 문서(펼치기)</summary>
