@@ -12,8 +12,7 @@ LLM 활용 내부 고객 업무 효율성 향상을 위한 API 전문 사내 개
 - LLM/SLLM 성능 평가(RAGAS/자체 정량 RAG 평가/TOOL CALL 평가 등)
 - README 문서화
 
-### 🔗 링크
-[운영 사이트](https://code-nova.dev) · [시연 영상](https://youtu.be/fQ38bUQxsQo?si=UCtYOwSDfbL9RxLD)
+### 🔗 시연영상: https://youtu.be/fQ38bUQxsQo?si=UCtYOwSDfbL9RxLD
 
 ### 📌 적용 범위
 - 구글 API 전문 어시스턴트: RAG + 하이브리드 검색(원문/QA) + 재시도 로직(Hyde 가상답변 기반 재검색 / Top_k 조정)
