@@ -24,10 +24,11 @@ LLM 활용 내부 고객 업무 효율성 향상을 위한 API 전문 사내 개
 - API 챗봇 Top‑K 최적화: BM25+DENSE(BGE‑M3) 앙상블·한/영 쿼리 적용, 품질 평가 후 HyDE 가상답변 기반 재검색에서 Top‑K를 초기 5/20(원문/QA) → 15/30으로 증대(자체 총점 18.35/20)
 
 ### 🔍 핵심 성과
-- sLLM(Qwen3‑8B) TOOL CALL: tool_selection 79.22% → 98.05% (+18.83%p), params_selection 79.22% → 98.05% (+18.83%p), params_value_similarity 77.21% → 88.50% (+11.29%p)
-- sLLM(Qwen3‑8B) RAGAS: Context Recall 0.9273, Faithfulness 0.8614, Factual Correctness(f1) 0.3709
-- API 챗봇(GPT‑4) Top‑K(재시도 로직) 최적화: 초기 5/20 → 재검색 15/30 채택(품질·속도 균형, 자체 정량 RAG 평가 총점 18.35/20)
+- sLLM(Qwen3‑8B) 파인튜닝 TOOL CALL 성능 개선: tool_selection 79.22% → 98.05% (+18.83%p), params_selection 79.22% → 98.05% (+18.83%p), params_value_similarity 77.21% → 88.50% (+11.29%p)
+- sLLM(Qwen3‑8B) RAGAS 평가: Context Recall 0.9273, Faithfulness 0.8614, Factual Correctness(f1) 0.3709
 - sLLM(Qwen3‑8B) Top‑K 테스트: k=7에서 평균 72.53 최고(정확도 71.52 / 재현율 77.58 / 구체성 68.48)
+- API 챗봇(GPT‑4) Top‑K(재시도 로직) 최적화: 초기 5/20 → 재검색 15/30 채택(품질·속도 균형, 자체 정량 RAG 평가 총점 18.35/20)
+- API 챗봇에 멀티모달 적용(STT/이미지 처리): OpenAI Whisper 모델과 GPT 4o(이미지 설명 분석)를 사용하여 멀티모달 챗봇 기능 구현
 - API 챗봇 경쟁력 확보(Perplexity 대비 정량적 RAG 평가): 전체 평균 +21.11%p 우위 (정확도 +16.66%p, 재현율 +18.34%p, 신뢰성 +28.34%p)
 
 ### 🧭 설계·접근 요약(서비스별)
