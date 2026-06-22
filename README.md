@@ -24,24 +24,51 @@ LLM 활용 내부 고객 업무 효율성 향상을 위한 API 전문 사내 개
 - API 챗봇 Top‑K 최적화: BM25+DENSE(BGE‑M3) 앙상블·한/영 쿼리 적용, 품질 평가 후 HyDE 가상답변 기반 재검색에서 Top‑K를 초기 5/20(원문/QA) → 15/30으로 증대(자체 총점 18.35/20)
 
 ### 🔍 핵심 성과
-- sLLM(Qwen3‑8B) 파인튜닝 TOOL CALL 성능 개선: tool_selection 79.22% → 98.05% (+18.83%p), params_selection 79.22% → 98.05% (+18.83%p), params_value_similarity 77.21% → 88.50% (+11.29%p)
-- sLLM(Qwen3‑8B) RAGAS 평가: Context Recall 0.9273, Faithfulness 0.8614, Factual Correctness(f1) 0.3709
-- sLLM(Qwen3‑8B) Top‑K 테스트: k=7에서 평균 72.53 최고(정확도 71.52 / 재현율 77.58 / 구체성 68.48)
-- API 챗봇(GPT‑4) Top‑K(재시도 로직) 최적화: 초기 5/20 → 재검색 15/30 채택(품질·속도 균형, 자체 정량 RAG 평가 총점 18.35/20)
-- API 챗봇에 멀티모달 적용(STT/이미지 처리): OpenAI Whisper 모델과 GPT 4o(이미지 설명 분석)를 사용하여 멀티모달 챗봇 기능 구현
-- API 챗봇 경쟁력 확보(Perplexity 대비 정량적 RAG 평가): 전체 평균 +21.11%p 우위 (정확도 +16.66%p, 재현율 +18.34%p, 신뢰성 +28.34%p)
+
+| 영역 | 항목 | 결과 |
+|---|---|---|
+| sLLM(Qwen3‑8B) | 파인튜닝 TOOL CALL 성능 개선 | tool_selection 79.22% → 98.05% (+18.83%p), params_selection 79.22% → 98.05% (+18.83%p), params_value_similarity 77.21% → 88.50% (+11.29%p) |
+| sLLM(Qwen3‑8B) | RAGAS 평가 | Context Recall 0.9273 / Faithfulness 0.8614 / Factual Correctness(f1) 0.3709 |
+| sLLM(Qwen3‑8B) | Top‑K 테스트 | k=7에서 평균 72.53 최고 (정확도 71.52 / 재현율 77.58 / 구체성 68.48) |
+| API 챗봇(GPT‑4) | Top‑K(재시도 로직) 최적화 | 초기 5/20 → 재검색 15/30 채택 (품질·속도 균형, 자체 정량 RAG 평가 총점 18.35/20) |
+| API 챗봇 | 멀티모달 적용(STT/이미지 처리) | OpenAI Whisper + GPT‑4o(이미지 설명 분석)로 멀티모달 챗봇 기능 구현 |
+| API 챗봇 | 경쟁력 확보(Perplexity 대비 정량적 RAG 평가) | 전체 평균 +21.11%p 우위 (정확도 +16.66%p, 재현율 +18.34%p, 신뢰성 +28.34%p) |
 
 ### 🧭 설계·접근 요약(서비스별)
-- API 챗봇(GPT‑4)
-  - 하이브리드 검색(BGE‑M3 0.8 + BM25 0.2), 한/영 쿼리 지원
-  - 품질 평가 노드: bad 시 HyDE 가상답변 기반 재검색 · Top‑K(원문/QA) 5/20→15/30 조정
-- 사내 sLLM(Qwen3‑8B)
-  - 권한 기반 RAG(팀/직급별 벡터 DB·툴 제한)로 접근 제어·신뢰도 강화
-  - TOOL CALL 설계(검색 필요 판단·파라미터 선택) 및 파인튜닝으로 멀티턴 TOOL CALL 품질 향상
+
+#### API 챗봇 (LangGraph + GPT‑4o)
+
+| 항목 | 내용 |
+|---|---|
+| **모델 선정** | GPT‑4o/4o‑mini 혼합(OpenAI API) — 멀티모달 강점, JSON 모드·함수호출 기반 구조화 출력, temperature=0 재현성, OpenAI 생태계 호환, 4o‑mini로 비용/지연 최적화, 엔터프라이즈 적합성 |
+| **워크플로우(LangGraph)** | 이미지 분석 → 질문 분류(api/basic/none) → 쿼리 추출·분리 → LLM 툴 호출(쿼리에 맞는 API 태그 자동 선택) → 하이브리드 검색 → 답변 생성 → 품질 평가 → (bad 시) 검색 쿼리 재생성 & 재검색 후 재답변 |
+| **하이브리드 검색** | Chroma + BGE‑m3(가중 0.8, normalize=True) + BM25(가중 0.2), 태그별 BM25 인덱스 캐싱(pkl), 구글 API 11개 태그 지원 |
+| **모델별 역할/설정** | 메인·분류·추출은 GPT‑4o(temperature=0, 쿼리 추출은 JSON 모드), 품질 평가는 GPT‑4.1(temperature=0), 임베딩/저장소는 BAAI/bge‑m3 + Chroma(원문/QA) |
+| **품질 평가·재시도 전략** | good/bad 평가로 부정적·회피적 답변 감지 → bad 시 HyDE 가상답변 기반 재검색, Top‑K(원문/QA) 초기 5/20 → 재검색 15/30, 최대 재시도 1회 |
+| **멀티모달/메모리** | 이미지 자동 분석·텍스트 통합 및 이미지‑텍스트 연관 질의 처리(S3 이미지 저장/URL 관리), MemorySaver로 최근 4개 메시지 히스토리 유지 |
+
+#### 사내 sLLM (Qwen3‑8B, LoRA 파인튜닝)
+
+| 항목 | 내용 |
+|---|---|
+| **대상/데이터** | Qwen3‑8B(메인)·Qwen2.5‑7B‑Instruct(비교), 팀별(Backend/Frontend/Data_AI/CTO)·말투(공손/친구)를 통합한 `qwen3_company_train_dataset_combined.json` |
+| **학습 설정** | epochs=3, per_device_train_batch_size=4, grad_accum=2, lr=1e‑4, optimizer=adamw_torch_fused, dtype=bfloat16, max_len=8192 |
+| **LoRA 설정** | alpha=32, dropout=0.1, rank=8, target=["q_proj","v_proj"], bias=none / gradient_checkpointing=True, grad_clip=0.3, warmup_ratio=0.03, scheduler=constant |
+| **전처리** | Qwen chat 템플릿 적용, assistant 응답만 라벨링, 배치 최대 길이 패딩, 토큰 최대 8192 |
+| **TOOL CALL 학습 설계** | 문서 검색 질문 → tool_call → tool_response → 모델 답변 / 일상 질문 → 툴 호출 없이 즉시 답변. 멀티턴 맥락을 고려해 툴 호출 여부를 정확히 판단하도록 학습 |
+| **권한 기반 RAG** | 팀/직급별 벡터 DB 분리·툴 제한으로 접근 제어 및 보안 강화 |
 
 ### 📈 성능 평가 결과(핵심 지표)
 
 #### sLLM(Qwen3‑8B) 파인튜닝 TOOL CALL 성능 테스트
+
+**평가 지표 정의**
+
+| 지표 | 계산/해석 |
+|---|---|
+| `tool_selection` | 정답에 tool_call이 있는 샘플 중 예측이 TOOL NAME까지 맞은 비율(정확한 도구 선택 여부) |
+| `params_selection` | 정답 키와 예측 키의 매칭 수 / (정답 키 수 + 예측에만 있는 키 수) — 필요한 키를 정확히 선택하고 불필요한 키를 추가하지 않았는지 |
+| `params_value_similarity` | 공통 키의 값 유사도, 형태소 Jaccard(0.6) + 문자 유사도(0.4)의 평균 |
 
 | 모델 | tool_selection | params_selection | params_value_similarity |
 |---|---:|---:|---:|
@@ -51,6 +78,14 @@ LLM 활용 내부 고객 업무 효율성 향상을 위한 API 전문 사내 개
 | Qwen2.5-7B (파인튜닝) | 99.68% | 99.68% | 87.55% |
 
 #### sLLM(Qwen3‑8B vs Qwen2.5-7B) RAGAS 테스트
+
+**평가 지표 정의** (LLM + 자체 데이터셋 55개)
+
+| 지표 | 설명 |
+|---|---|
+| `context_recall` | 검색된 문맥이 질문과 기준 정답을 얼마나 잘 포괄하는지 |
+| `faithfulness` | 생성된 답변이 검색된 문맥에 얼마나 충실한지 |
+| `factual_correctness(f1)` | 생성된 답변이 기준 정답과 의미적으로 얼마나 일치하는지(F1 기반) |
 
 | 모델 | context_recall | faithfulness | factual_correctness(f1) |
 |---|---:|---:|---:|
