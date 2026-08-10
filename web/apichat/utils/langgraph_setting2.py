@@ -14,7 +14,7 @@ def graph_setting():
     graph.add_node("analyze_image", analyze_image)
     graph.add_node("classify", classify)
 
-    # classify 후 route와 level에 따라 분기
+    # classify 후 route에 따라 분기
     graph.add_conditional_edges(
         "classify",
         route_from_classify,  # classify 함수에서 route를 분류

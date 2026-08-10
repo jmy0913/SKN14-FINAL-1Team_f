@@ -8,7 +8,7 @@ SUPERUSER_PASSWORD = os.getenv("DJANGO_SUPERUSER_PASSWORD")  # OS 환경변수
 class Command(BaseCommand):
     help = "Create a superuser if not already exists"
 
-    def handle(self):
+    def handle(self, *args, **options):
         User = get_user_model()
         if not User.objects.filter(id="admin").exists():
             User.objects.create_superuser(

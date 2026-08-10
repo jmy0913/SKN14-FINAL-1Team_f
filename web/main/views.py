@@ -1,6 +1,4 @@
 import json
-import chromadb
-from chromadb.utils import embedding_functions
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -197,12 +195,13 @@ def ensure_search_initialized():
     if collection is not None:
         return
 
-    client = chromadb.PersistentClient(path="apichat/utils/chroma_db")
-    emb = embedding_functions.SentenceTransformerEmbeddingFunction(
-        model_name="BAAI/bge-m3",
-        device="cpu",
-    )
-    collection = client.get_collection(name="google_api_docs", embedding_function=emb)
+    # 챗봇(apichat)이 서버 시작 시 이미 로드해 둔 벡터스토어를 재사용한다.
+    # 같은 chroma_db 경로/컬렉션(google_api_docs)을 가리키므로,
+    # 별도 PersistentClient와 임베딩 모델(bge-m3)을 다시 띄우지 않아도 된다.
+    # (이전에는 첫 검색 요청 때 bge-m3를 처음 메모리에 올려서 느렸음)
+    from apichat.utils.retriever_hybrid import _vs
+
+    collection = _vs._collection
 
 
 def normalize_meta(meta, default_doc=""):  # Chroma 메타데이터 정리
@@ -240,8 +239,13 @@ def normalize_meta(meta, default_doc=""):  # Chroma 메타데이터 정리
 
 def search_dense(q, k):
     ensure_search_initialized()
+    # 챗봇이 사용하는 것과 동일한(이미 로드된) 임베딩 객체로 쿼리를 임베딩한다.
+    # 벡터스토어가 langchain Chroma라 chromadb 레벨 임베딩 함수가 없으므로
+    # query_texts 대신 query_embeddings로 질의한다.
+    from apichat.utils.retriever import embeddings
+
     res = collection.query(
-        query_texts=[q],
+        query_embeddings=[embeddings.embed_query(q)],
         n_results=k * 3,
         include=["documents", "metadatas"],
     )

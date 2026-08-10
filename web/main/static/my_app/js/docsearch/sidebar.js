@@ -36,13 +36,6 @@
     console.info("[docsearch] endpoint:", ENDPOINT);
 
     // Utils
-    const debounce = (fn, ms = 300) => {
-      let t;
-      return (...a) => {
-        clearTimeout(t);
-        t = setTimeout(() => fn(...a), ms);
-      };
-    };
     const setStatus = (msg) => {
       if (els.status) els.status.textContent = msg || "";
     };
@@ -142,7 +135,9 @@
     }
 
     // Events
-    const runSearch = debounce(() => doSearch(els.input?.value), 300);
+    // 타이핑할 때마다 검색하면(검색-as-you-type) 버려질 요청이 다수 발생하고,
+    // 클라이언트가 abort 해도 서버는 bge-m3 임베딩을 끝까지 계산해 CPU가 경합한다.
+    // → Enter/버튼/폼 제출 시에만 1회 검색하도록 한다.
 
     // 폼 새로고침 방지
     const parentForm = els.btn?.closest("form");
@@ -163,7 +158,6 @@
         doSearch(els.input.value);
       }
     });
-    els.input?.addEventListener("input", runSearch);
 
     // 슬라이더 값 변경 이벤트 (k 표시 + 즉시 검색)
     els.k?.addEventListener("input", () => {

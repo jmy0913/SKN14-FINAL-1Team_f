@@ -15,12 +15,15 @@ def hybrid_retriever_setting(api_tags, k=5):
     특정 태그 리스트에 맞는 원문 하이브리드 retriever 생성
     - api_tags: ["drive"], ["gmail"], ["drive","calendar"] 등
     """
-    filters = {}
+    # 필터는 반드시 search_kwargs '안에' 넣어야 한다.
+    # as_retriever(filter=...) 처럼 바깥에 주면 알 수 없는 인자로 취급되어 조용히 버려진다.
+    # 태그가 없을 때 빈 dict를 넘기면 Chroma가 에러를 내므로 그때는 아예 넣지 않는다.
+    search_kwargs = {"k": k}
     if api_tags:
-        filters["tags"] = {"$in": api_tags}
+        search_kwargs["filter"] = {"tags": {"$in": api_tags}}
 
     # Chroma retriever (필터 적용)
-    chroma_retriever = _vs.as_retriever(search_kwargs={"k": k}, filter=filters)
+    chroma_retriever = _vs.as_retriever(search_kwargs=search_kwargs)
 
     # 태그별 BM25 retrievers
     # bm25_retrievers = 요청된 태그들(api_tags)에 해당하는 BM25Retriever 객체들의 리스트
@@ -47,11 +50,12 @@ def hybrid_retriever_setting_qa(api_tags, k=20):
     """
     특정 태그 리스트에 맞는 QA 하이브리드 retriever 생성
     """
-    filters = {}
+    # 원문 쪽과 동일. Chroma의 k는 기존 동작을 유지하기 위해 5로 둔다(인자 k는 BM25용).
+    search_kwargs = {"k": 5}
     if api_tags:
-        filters["tags"] = {"$in": api_tags}
+        search_kwargs["filter"] = {"tags": {"$in": api_tags}}
 
-    chroma_retriever = _vs_qa.as_retriever(search_kwargs={"k": 5}, filter=filters)
+    chroma_retriever = _vs_qa.as_retriever(search_kwargs=search_kwargs)
 
     bm25_dict = bm25_retrievers_by_tag_qa(k=k)
     bm25_retrievers = [bm25_dict[tag] for tag in api_tags if tag in bm25_dict]

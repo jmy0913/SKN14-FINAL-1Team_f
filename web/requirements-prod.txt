@@ -16,4 +16,5 @@ sentence-transformers==5.1.0
 gdown
 boto3
 rank_bm25
+kiwipiepy
 konlpy

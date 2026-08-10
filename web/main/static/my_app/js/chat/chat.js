@@ -524,18 +524,12 @@ async function sendAudioToServer(audioBlob) {
 
     const data = await response.json();
 
-    if (data.success) {
-      // 1. 먼저 변환된 텍스트를 사용자 메시지로 표시
-      addMessage(data.transcribed_text, "user");
-
-      // 2. 그 다음 봇 응답을 위한 로딩 메시지 표시
-      showLoadingMessage();
-
-      // 3. 봇 응답 표시 (로딩 메시지 제거 후)
-      setTimeout(() => {
-        hideLoadingMessage();
-        addMessage(data.bot_response, "bot");
-      }, 1000); // 1초 후 봇 응답 표시 (실제로는 서버 응답에 따라 조정)
+    if (data.success && data.transcribed_text) {
+      // STT 인식 결과를 입력창에 채운 뒤, 일반 텍스트 채팅 흐름으로 전송.
+      // sendMessage 내부에서 사용자 메시지를 먼저 화면에 표시한 다음
+      // 로딩 → 봇 응답 → 연관질문 추천까지 처리한다.
+      chatInput.value = data.transcribed_text;
+      sendMessage();
     }
   } catch (error) {
     console.error("음성 전송 에러:", error);

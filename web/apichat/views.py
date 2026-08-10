@@ -387,52 +387,16 @@ def transcribe_audio(request):
             audio_file = request.FILES.get("audio")
             session_id = request.POST.get("session_id")
 
-            session = ChatSession.objects.get(id=session_id, user=request.user)
+            # 세션 소유권 검증 (STT 결과는 이후 일반 채팅 흐름으로 전송됨)
+            ChatSession.objects.get(id=session_id, user=request.user)
 
-            # Whisper API 호출
+            # Whisper API 호출 (STT 변환만 수행)
             transcribed_text = call_whisper_api(audio_file)
-
-            # 채팅 히스토리 가져오기
-            db_chat_history = []
-            messages = ChatMessage.objects.filter(session=session).order_by(
-                "-created_at"
-            )[:6]
-            messages = reversed(messages)
-
-            for msg in messages:
-                if msg.role == "user":
-                    db_chat_history.append({"role": "user", "content": msg.content})
-                else:
-                    db_chat_history.append(
-                        {"role": "assistant", "content": msg.content}
-                    )
-
-            db_chat_history.append({"role": "user", "content": transcribed_text})
-
-            # run_langraph 호출
-            try:
-                response = run_langraph(
-                    transcribed_text, session_id, None, db_chat_history
-                )
-            except Exception as e:
-                if "Rate limit" in str(e) or "429" in str(e):
-                    response = "죄송합니다. 현재 API 사용량이 한도를 초과했습니다. 잠시 후 다시 시도해 주세요."
-                else:
-                    response = f"응답 생성 중 오류가 발생했습니다: {str(e)}"
-
-            # DB에 저장
-            ChatMessage.objects.create(
-                session=session, role="user", content=transcribed_text
-            )
-            ChatMessage.objects.create(
-                session=session, role="assistant", content=response
-            )
 
             return JsonResponse(
                 {
                     "success": True,
                     "transcribed_text": transcribed_text,
-                    "bot_response": response,
                 }
             )
 
@@ -641,8 +605,14 @@ def generate_suggestions(user_q: str, answer: str, k: int = 5) -> list[str]:
             }
         ).strip()
 
+        # LLM 출력 정제: ```json ... ``` 코드펜스/설명 문구 제거 후 JSON 배열만 추출
+        cleaned = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw_output).strip()
+        match = re.search(r"\[.*\]", cleaned, re.DOTALL)
+        if match:
+            cleaned = match.group(0)
+
         # JSON 파싱
-        suggestions = json.loads(raw_output)
+        suggestions = json.loads(cleaned)
 
         # 후처리 (중복/길이/타입 체크)
         seen, out = set(), []
